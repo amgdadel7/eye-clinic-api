@@ -1,0 +1,2123 @@
+{
+	"info": {
+		"_postman_id": "eye-clinic-api-collection",
+		"name": "Eye Clinic Management System API",
+		"description": "Comprehensive API collection for Eye Clinic Management System with authentication, patient management, appointments, and medical records.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "eye-clinic-api"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Check API health status"
+					},
+					"response": []
+				},
+				{
+					"name": "Welcome",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "Get API welcome message and basic info"
+					},
+					"response": []
+				}
+			],
+			"description": "Basic health check and welcome endpoints"
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register Clinic",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"clinicName\": \"Advanced Eye Clinic\",\n    \"clinicLicense\": \"EYE2024001\",\n    \"clinicPhone\": \"+966501234567\",\n    \"clinicEmail\": \"info@advancedeyeclinic.com\",\n    \"ownerName\": \"Dr. Ahmed Mohamed\",\n    \"ownerEmail\": \"ahmed@advancedeyeclinic.com\",\n    \"ownerPhone\": \"+966501234567\",\n    \"ownerPassword\": \"SecurePass123!\",\n    \"clinicAddress\": \"Riyadh, Saudi Arabia\",\n    \"clinicSpecialty\": \"Ophthalmology\",\n    \"workingHours\": {\n        \"sunday\": {\"start\": \"09:00\", \"end\": \"17:00\"},\n        \"monday\": {\"start\": \"09:00\", \"end\": \"17:00\"},\n        \"tuesday\": {\"start\": \"09:00\", \"end\": \"17:00\"},\n        \"wednesday\": {\"start\": \"09:00\", \"end\": \"17:00\"},\n        \"thursday\": {\"start\": \"09:00\", \"end\": \"17:00\"},\n        \"friday\": {\"start\": \"14:00\", \"end\": \"18:00\"},\n        \"saturday\": {\"start\": \"09:00\", \"end\": \"13:00\"}\n    },\n    \"services\": [\"Eye Examination\", \"Cataract Surgery\", \"LASIK\", \"Glaucoma Treatment\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register-clinic",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register-clinic"
+							]
+						},
+						"description": "Register a new clinic with owner account"
+					},
+					"response": []
+				},
+				{
+					"name": "Login (System Users)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"ahmed@advancedeyeclinic.com\",\n    \"password\": \"SecurePass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login for system users (admin, doctor, receptionist)"
+					},
+					"response": []
+				},
+				{
+					"name": "Register User (Doctor/Receptionist)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Dr. Sarah Ahmed\",\n    \"email\": \"sarah@advancedeyeclinic.com\",\n    \"phone\": \"+966501234568\",\n    \"password\": \"DoctorPass123!\",\n    \"role\": \"doctor\",\n    \"department\": \"Ophthalmology\",\n    \"specialty\": \"Retina Specialist\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register-user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register-user"
+							]
+						},
+						"description": "Register a new user (doctor or receptionist) - Admin only"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Get current authenticated user information"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for system users"
+		},
+		{
+			"name": "Mobile Authentication",
+			"item": [
+				{
+					"name": "Register Patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Ahmed Ali\",\n    \"phone\": \"+966501234567\",\n    \"email\": \"ahmed@patient.com\",\n    \"password\": \"patient123\",\n    \"age\": 30,\n    \"gender\": \"male\",\n    \"dateOfBirth\": \"1990-01-01\",\n    \"address\": \"Riyadh, Saudi Arabia\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/mobile/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"mobile",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new patient"
+					},
+					"response": []
+				},
+				{
+					"name": "Login Patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"+966501234567\",\n    \"password\": \"patient123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/mobile/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"mobile",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login for patients"
+					},
+					"response": []
+				}
+			],
+			"description": "Mobile authentication endpoints for patients"
+		},
+		{
+			"name": "Clinics",
+			"item": [
+				{
+					"name": "Get All Clinics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/clinics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clinics"
+							]
+						},
+						"description": "Get all clinics"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Clinic by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/clinics/{{clinic_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clinics",
+								"{{clinic_id}}"
+							]
+						},
+						"description": "Get specific clinic by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Clinic Doctors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/clinics/{{clinic_id}}/doctors",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clinics",
+								"{{clinic_id}}",
+								"doctors"
+							]
+						},
+						"description": "Get all doctors in a specific clinic"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Clinic Services",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/clinics/{{clinic_id}}/services",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clinics",
+								"{{clinic_id}}",
+								"services"
+							]
+						},
+						"description": "Get services offered by a specific clinic"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Clinic",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Advanced Eye Clinic Updated\",\n    \"phone\": \"+966501234567\",\n    \"email\": \"info@advancedeyeclinic.com\",\n    \"address\": \"Updated Address, Riyadh\",\n    \"specialty\": \"Advanced Ophthalmology\",\n    \"website\": \"https://advancedeyeclinic.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/clinics/{{clinic_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clinics",
+								"{{clinic_id}}"
+							]
+						},
+						"description": "Update clinic information - Admin only"
+					},
+					"response": []
+				}
+			],
+			"description": "Clinic management endpoints"
+		},
+		{
+			"name": "Patients",
+			"item": [
+				{
+					"name": "Get All Patients",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/patients",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patients"
+							]
+						},
+						"description": "Get all patients - Admin/Receptionist only"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patient by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/patients/{{patient_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patients",
+								"{{patient_id}}"
+							]
+						},
+						"description": "Get specific patient by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Fatima Al-Rashid\",\n    \"phone\": \"+966501234569\",\n    \"email\": \"fatima@patient.com\",\n    \"age\": 25,\n    \"gender\": \"female\",\n    \"dateOfBirth\": \"1995-05-15\",\n    \"address\": \"Jeddah, Saudi Arabia\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patients",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patients"
+							]
+						},
+						"description": "Create a new patient - Admin/Receptionist only"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Patient",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Fatima Al-Rashid Updated\",\n    \"phone\": \"+966501234569\",\n    \"email\": \"fatima.updated@patient.com\",\n    \"age\": 26,\n    \"address\": \"Updated Address, Jeddah\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patients/{{patient_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patients",
+								"{{patient_id}}"
+							]
+						},
+						"description": "Update patient information"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Patient",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/patients/{{patient_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patients",
+								"{{patient_id}}"
+							]
+						},
+						"description": "Delete patient - Admin only"
+					},
+					"response": []
+				}
+			],
+			"description": "Patient management endpoints"
+		},
+		{
+			"name": "Doctors",
+			"item": [
+				{
+					"name": "Get All Doctors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/doctors",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctors"
+							]
+						},
+						"description": "Get all doctors"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Doctor by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/doctors/{{doctor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctors",
+								"{{doctor_id}}"
+							]
+						},
+						"description": "Get specific doctor by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Doctor",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": {{user_id}},\n    \"specialization\": \"Pediatric Ophthalmology\",\n    \"specialty_id\": \"PED-OPH-001\",\n    \"experience\": \"5 years\",\n    \"license_number\": \"DOC-2024-001\",\n    \"working_hours\": {\n        \"sunday\": {\"start\": \"09:00\", \"end\": \"17:00\"},\n        \"monday\": {\"start\": \"09:00\", \"end\": \"17:00\"},\n        \"tuesday\": {\"start\": \"09:00\", \"end\": \"17:00\"},\n        \"wednesday\": {\"start\": \"09:00\", \"end\": \"17:00\"},\n        \"thursday\": {\"start\": \"09:00\", \"end\": \"17:00\"},\n        \"friday\": {\"start\": \"14:00\", \"end\": \"18:00\"},\n        \"saturday\": {\"start\": \"09:00\", \"end\": \"13:00\"}\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/doctors",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctors"
+							]
+						},
+						"description": "Create a new doctor profile - Admin only"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Doctor",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"specialization\": \"Advanced Pediatric Ophthalmology\",\n    \"experience\": \"7 years\",\n    \"license_number\": \"DOC-2024-001-UPDATED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/doctors/{{doctor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctors",
+								"{{doctor_id}}"
+							]
+						},
+						"description": "Update doctor information"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Doctor Schedule",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/doctors/{{doctor_id}}/schedule",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctors",
+								"{{doctor_id}}",
+								"schedule"
+							]
+						},
+						"description": "Get doctor's schedule"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Doctor Schedule",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"working_hours\": {\n        \"sunday\": {\"start\": \"10:00\", \"end\": \"18:00\"},\n        \"monday\": {\"start\": \"10:00\", \"end\": \"18:00\"},\n        \"tuesday\": {\"start\": \"10:00\", \"end\": \"18:00\"},\n        \"wednesday\": {\"start\": \"10:00\", \"end\": \"18:00\"},\n        \"thursday\": {\"start\": \"10:00\", \"end\": \"18:00\"},\n        \"friday\": {\"start\": \"15:00\", \"end\": \"19:00\"},\n        \"saturday\": {\"start\": \"10:00\", \"end\": \"14:00\"}\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/doctors/{{doctor_id}}/schedule",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctors",
+								"{{doctor_id}}",
+								"schedule"
+							]
+						},
+						"description": "Update doctor's schedule"
+					},
+					"response": []
+				}
+			],
+			"description": "Doctor management endpoints"
+		},
+		{
+			"name": "Appointments",
+			"item": [
+				{
+					"name": "Get All Appointments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/appointments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments"
+							]
+						},
+						"description": "Get all appointments"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Today's Appointments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/appointments/today",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"today"
+							]
+						},
+						"description": "Get today's appointments"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Doctor Appointments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/appointments/doctor/{{doctor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"doctor",
+								"{{doctor_id}}"
+							]
+						},
+						"description": "Get appointments for a specific doctor"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Appointment by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/appointments/{{appointment_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"{{appointment_id}}"
+							]
+						},
+						"description": "Get specific appointment by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Appointment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patient_id\": {{patient_id}},\n    \"doctor_id\": {{doctor_id}},\n    \"appointment_date\": \"2024-12-15\",\n    \"appointment_time\": \"10:00\",\n    \"type\": \"consultation\",\n    \"notes\": \"Regular checkup\",\n    \"status\": \"scheduled\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/appointments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments"
+							]
+						},
+						"description": "Create a new appointment"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Appointment",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"appointment_date\": \"2024-12-16\",\n    \"appointment_time\": \"11:00\",\n    \"notes\": \"Updated appointment time\",\n    \"status\": \"confirmed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/appointments/{{appointment_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"{{appointment_id}}"
+							]
+						},
+						"description": "Update appointment information"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Appointment",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/appointments/{{appointment_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"{{appointment_id}}"
+							]
+						},
+						"description": "Delete appointment"
+					},
+					"response": []
+				}
+			],
+			"description": "Appointment management endpoints"
+		},
+		{
+			"name": "Mobile Appointments",
+			"item": [
+				{
+					"name": "Book Appointment (Auto Schedule)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"doctor_id\": {{doctor_id}},\n    \"type\": \"consultation\",\n    \"notes\": \"Regular eye checkup\",\n    \"preferred_date\": \"2024-12-15\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/mobile/appointments/book",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"mobile",
+								"appointments",
+								"book"
+							]
+						},
+						"description": "Book appointment with automatic scheduling"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Appointments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/mobile/appointments/my-appointments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"mobile",
+								"appointments",
+								"my-appointments"
+							]
+						},
+						"description": "Get patient's appointments"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Available Slots",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/mobile/appointments/available-slots?doctor_id={{doctor_id}}&date=2024-12-15",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"mobile",
+								"appointments",
+								"available-slots"
+							],
+							"query": [
+								{
+									"key": "doctor_id",
+									"value": "{{doctor_id}}"
+								},
+								{
+									"key": "date",
+									"value": "2024-12-15"
+								}
+							]
+						},
+						"description": "Get available appointment slots for a doctor on a specific date"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Appointment",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"cancelled\",\n    \"cancellation_reason\": \"Personal reasons\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/mobile/appointments/{{appointment_id}}/cancel",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"mobile",
+								"appointments",
+								"{{appointment_id}}",
+								"cancel"
+							]
+						},
+						"description": "Cancel appointment"
+					},
+					"response": []
+				}
+			],
+			"description": "Mobile appointment endpoints for patients"
+		},
+		{
+			"name": "Prescriptions",
+			"item": [
+				{
+					"name": "Get All Prescriptions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/prescriptions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"prescriptions"
+							]
+						},
+						"description": "Get all prescriptions"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Prescription by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/prescriptions/{{prescription_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"prescriptions",
+								"{{prescription_id}}"
+							]
+						},
+						"description": "Get specific prescription by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Prescription",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patient_id\": {{patient_id}},\n    \"doctor_id\": {{doctor_id}},\n    \"medications\": [\n        {\n            \"name\": \"Eye Drops\",\n            \"dosage\": \"2 drops\",\n            \"frequency\": \"twice daily\",\n            \"duration\": \"7 days\",\n            \"instructions\": \"Apply to both eyes\"\n        }\n    ],\n    \"notes\": \"Use as directed. Avoid touching the tip of the bottle.\",\n    \"follow_up_date\": \"2024-12-22\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/prescriptions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"prescriptions"
+							]
+						},
+						"description": "Create a new prescription - Doctor only"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patient Prescriptions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/prescriptions/patient/{{patient_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"prescriptions",
+								"patient",
+								"{{patient_id}}"
+							]
+						},
+						"description": "Get all prescriptions for a specific patient"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Prescriptions (Mobile)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/mobile/prescriptions/my-prescriptions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"mobile",
+								"prescriptions",
+								"my-prescriptions"
+							]
+						},
+						"description": "Get patient's prescriptions - Mobile"
+					},
+					"response": []
+				}
+			],
+			"description": "Prescription management endpoints"
+		},
+		{
+			"name": "Medical Reports",
+			"item": [
+				{
+					"name": "Get All Medical Reports",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/medical-reports",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"medical-reports"
+							]
+						},
+						"description": "Get all medical reports"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Medical Report by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/medical-reports/{{report_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"medical-reports",
+								"{{report_id}}"
+							]
+						},
+						"description": "Get specific medical report by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Medical Report",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patient_id\": {{patient_id}},\n    \"doctor_id\": {{doctor_id}},\n    \"report_type\": \"Eye Examination\",\n    \"findings\": \"Normal eye examination. No abnormalities detected.\",\n    \"diagnosis\": \"Normal vision\",\n    \"recommendations\": \"Continue regular checkups every 6 months\",\n    \"next_appointment\": \"2024-06-15\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/medical-reports",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"medical-reports"
+							]
+						},
+						"description": "Create a new medical report - Doctor only"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patient Medical Reports",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/medical-reports/patient/{{patient_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"medical-reports",
+								"patient",
+								"{{patient_id}}"
+							]
+						},
+						"description": "Get all medical reports for a specific patient"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Medical Reports (Mobile)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/mobile/medical-reports/my-reports",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"mobile",
+								"medical-reports",
+								"my-reports"
+							]
+						},
+						"description": "Get patient's medical reports - Mobile"
+					},
+					"response": []
+				}
+			],
+			"description": "Medical report management endpoints"
+		},
+		{
+			"name": "Test Results",
+			"item": [
+				{
+					"name": "Get All Test Results",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/test-results",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"test-results"
+							]
+						},
+						"description": "Get all test results"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Test Result by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/test-results/{{test_result_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"test-results",
+								"{{test_result_id}}"
+							]
+						},
+						"description": "Get specific test result by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Test Result",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patient_id\": {{patient_id}},\n    \"test_type\": \"Visual Acuity Test\",\n    \"test_date\": \"2024-12-15\",\n    \"results\": {\n        \"right_eye\": \"20/20\",\n        \"left_eye\": \"20/20\",\n        \"both_eyes\": \"20/20\"\n    },\n    \"notes\": \"Normal vision in both eyes\",\n    \"status\": \"normal\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/test-results",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"test-results"
+							]
+						},
+						"description": "Create a new test result"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patient Test Results",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/test-results/patient/{{patient_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"test-results",
+								"patient",
+								"{{patient_id}}"
+							]
+						},
+						"description": "Get all test results for a specific patient"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Test Results (Mobile)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/mobile/test-results/my-results",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"mobile",
+								"test-results",
+								"my-results"
+							]
+						},
+						"description": "Get patient's test results - Mobile"
+					},
+					"response": []
+				}
+			],
+			"description": "Test result management endpoints"
+		},
+		{
+			"name": "Color Blindness Tests",
+			"item": [
+				{
+					"name": "Get All Color Tests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/color-tests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"color-tests"
+							]
+						},
+						"description": "Get all color blindness tests"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Color Test by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/color-tests/{{test_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"color-tests",
+								"{{test_id}}"
+							]
+						},
+						"description": "Get specific color test by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Color Test",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"test_number\": 1,\n    \"image_data\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\",\n    \"correct_answer\": \"12\",\n    \"test_type\": \"ishihara\",\n    \"description\": \"Test for red-green color blindness\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/color-tests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"color-tests"
+							]
+						},
+						"description": "Create a new color blindness test - Admin/Doctor only"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Color Test",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"correct_answer\": \"12\",\n    \"description\": \"Updated test for red-green color blindness\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/color-tests/{{test_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"color-tests",
+								"{{test_id}}"
+							]
+						},
+						"description": "Update color test - Admin/Doctor only"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Color Test",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/color-tests/{{test_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"color-tests",
+								"{{test_id}}"
+							]
+						},
+						"description": "Delete color test - Admin only"
+					},
+					"response": []
+				}
+			],
+			"description": "Color blindness test management endpoints"
+		},
+		{
+			"name": "Mobile Color Tests",
+			"item": [
+				{
+					"name": "Get All Tests with Images",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/mobile/color-tests/all",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"mobile",
+								"color-tests",
+								"all"
+							]
+						},
+						"description": "Get all color tests with base64 images for mobile"
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Test Answers",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"answers\": [\n        {\"test_id\": 1, \"answer\": \"12\"},\n        {\"test_id\": 2, \"answer\": \"8\"},\n        {\"test_id\": 3, \"answer\": \"29\"}\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/mobile/color-tests/submit-answers",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"mobile",
+								"color-tests",
+								"submit-answers"
+							]
+						},
+						"description": "Submit color test answers"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Test Results",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/mobile/color-tests/my-results",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"mobile",
+								"color-tests",
+								"my-results"
+							]
+						},
+						"description": "Get patient's color test results"
+					},
+					"response": []
+				}
+			],
+			"description": "Mobile color blindness test endpoints"
+		},
+		{
+			"name": "Waiting Room",
+			"item": [
+				{
+					"name": "Get Waiting List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/waiting-room",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"waiting-room"
+							]
+						},
+						"description": "Get current waiting room list"
+					},
+					"response": []
+				},
+				{
+					"name": "Check-in Patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patient_id\": {{patient_id}},\n    \"appointment_id\": {{appointment_id}},\n    \"check_in_time\": \"2024-12-15T10:00:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/waiting-room/check-in",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"waiting-room",
+								"check-in"
+							]
+						},
+						"description": "Check-in patient to waiting room"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Patient Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"in_progress\",\n    \"notes\": \"Patient called for examination\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/waiting-room/{{waiting_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"waiting-room",
+								"{{waiting_id}}",
+								"status"
+							]
+						},
+						"description": "Update patient status in waiting room"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove from Waiting Room",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/waiting-room/{{waiting_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"waiting-room",
+								"{{waiting_id}}"
+							]
+						},
+						"description": "Remove patient from waiting room"
+					},
+					"response": []
+				}
+			],
+			"description": "Waiting room management endpoints"
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"description": "Get all users - Admin only"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/pending",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"pending"
+							]
+						},
+						"description": "Get pending users - Admin only"
+					},
+					"response": []
+				},
+				{
+					"name": "Approve User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}/approve",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}",
+								"approve"
+							]
+						},
+						"description": "Approve user - Admin only"
+					},
+					"response": []
+				},
+				{
+					"name": "Reject User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}/reject",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}",
+								"reject"
+							]
+						},
+						"description": "Reject user - Admin only"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Doctor Name\",\n    \"phone\": \"+966501234570\",\n    \"department\": \"Updated Department\",\n    \"specialty\": \"Updated Specialty\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Update user information"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Delete user - Admin only"
+					},
+					"response": []
+				}
+			],
+			"description": "User management endpoints"
+		},
+		{
+			"name": "Analytics",
+			"item": [
+				{
+					"name": "Dashboard Statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/analytics/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"dashboard"
+							]
+						},
+						"description": "Get dashboard statistics"
+					},
+					"response": []
+				},
+				{
+					"name": "Patient Statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/analytics/patients",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"patients"
+							]
+						},
+						"description": "Get patient statistics"
+					},
+					"response": []
+				},
+				{
+					"name": "Appointment Statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/analytics/appointments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"appointments"
+							]
+						},
+						"description": "Get appointment statistics"
+					},
+					"response": []
+				},
+				{
+					"name": "Revenue Statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/analytics/revenue",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"revenue"
+							]
+						},
+						"description": "Get revenue statistics - Admin only"
+					},
+					"response": []
+				}
+			],
+			"description": "Analytics and reporting endpoints"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "doctor_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "patient_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "clinic_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "patient_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "doctor_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "appointment_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "prescription_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "report_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "test_result_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "test_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "waiting_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}
