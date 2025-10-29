@@ -75,7 +75,6 @@ app.use((req, res, next) => {
 
 // Quiet missing favicon in logs
 app.get('/favicon.ico', (req, res) => res.status(204).end());
-
 // Rate limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
