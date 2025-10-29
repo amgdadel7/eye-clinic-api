@@ -13,7 +13,9 @@ const pool = mysql.createPool({
     queueLimit: 0,
     enableKeepAlive: true,
     keepAliveInitialDelay: 0,
-    charset: 'utf8mb4'
+    charset: 'utf8mb4',
+    // Some providers (e.g., shared hosts) require SSL
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
 });
 
 // Test connection

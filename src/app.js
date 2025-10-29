@@ -5,24 +5,75 @@ const cors = require('cors');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
+const swaggerSetup = require('./config/swagger');
 
 const app = express();
 
-// Middleware
-app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
-    credentials: true
-}));
+// Middleware - CORS Configuration
+const getCorsConfig = () => {
+    const allowedOriginsEnv = process.env.ALLOWED_ORIGINS;
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+    
+    if (!allowedOriginsEnv) {
+        // No ALLOWED_ORIGINS set - allow all origins
+        return {
+            origin: '*',
+            credentials: false,
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+            exposedHeaders: ['Content-Type', 'Authorization'],
+            optionsSuccessStatus: 200
+        };
+    }
+    
+    const allowedOrigins = allowedOriginsEnv.split(',').map(origin => origin.trim());
+    
+    return {
+        origin: function (origin, callback) {
+            // Allow requests with no origin (like mobile apps or curl requests)
+            if (!origin) return callback(null, true);
+            
+            // In development, always allow localhost origins for Swagger UI
+            if (isDevelopment && (
+                origin.startsWith('http://localhost') || 
+                origin.startsWith('http://127.0.0.1')
+            )) {
+                return callback(null, true);
+            }
+            
+            if (allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+        exposedHeaders: ['Content-Type', 'Authorization'],
+        optionsSuccessStatus: 200
+    };
+};
+
+app.use(cors(getCorsConfig()));
 
 app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Enforce UTF-8 charset for JSON responses
+// Ensure JSON responses use UTF-8 without affecting HTML/CSS (e.g., Swagger UI)
 app.use((req, res, next) => {
-    res.set('Content-Type', 'application/json; charset=utf-8');
+    const originalJson = res.json.bind(res);
+    res.json = (body) => {
+        res.set('Content-Type', 'application/json; charset=utf-8');
+        return originalJson(body);
+    };
     next();
 });
+
+// Quiet missing favicon in logs
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 // Rate limiting
 const limiter = rateLimit({
@@ -30,6 +81,9 @@ const limiter = rateLimit({
     max: 100
 });
 app.use(limiter);
+
+// Swagger Documentation
+swaggerSetup(app);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -56,7 +110,8 @@ app.get('/', (req, res) => {
         version: '1.0.0',
         endpoints: {
             health: '/health',
-            api: '/api'
+            api: '/api',
+            swagger: '/api-docs'
         }
     });
 });
@@ -68,7 +123,8 @@ app.get('/api', (req, res) => {
         version: '1.0.0',
         endpoints: {
             health: '/api/health',
-            api: '/api'
+            api: '/api',
+            swagger: '/api-docs'
         }
     });
 });
