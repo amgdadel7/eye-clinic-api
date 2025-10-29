@@ -3,6 +3,19 @@ const { sendSuccess, sendError } = require('../utils/response');
 
 exports.getAllTestResults = async (req, res) => {
     try {
+        // Scope by clinic using doctors -> clinic_id when available
+        if (req.user && req.user.clinicId) {
+            const [results] = await pool.execute(
+                `SELECT tr.*
+                 FROM test_results tr
+                 JOIN doctors d ON d.id = tr.doctor_id
+                 WHERE d.clinic_id = ?
+                 ORDER BY tr.test_date DESC`,
+                [req.user.clinicId]
+            );
+            return sendSuccess(res, { results });
+        }
+
         const [results] = await pool.execute(
             'SELECT * FROM test_results ORDER BY test_date DESC'
         );
@@ -16,6 +29,18 @@ exports.getAllTestResults = async (req, res) => {
 
 exports.getPatientTestResults = async (req, res) => {
     try {
+        if (req.user && req.user.clinicId) {
+            const [results] = await pool.execute(
+                `SELECT tr.*
+                 FROM test_results tr
+                 JOIN doctors d ON d.id = tr.doctor_id
+                 WHERE tr.patient_id = ? AND d.clinic_id = ?
+                 ORDER BY tr.test_date DESC`,
+                [req.params.patientId, req.user.clinicId]
+            );
+            return sendSuccess(res, { results });
+        }
+
         const [results] = await pool.execute(
             'SELECT * FROM test_results WHERE patient_id = ? ORDER BY test_date DESC',
             [req.params.patientId]

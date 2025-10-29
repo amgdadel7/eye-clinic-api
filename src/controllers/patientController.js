@@ -3,6 +3,19 @@ const { sendSuccess, sendError } = require('../utils/response');
 
 exports.getAllPatients = async (req, res) => {
     try {
+        // Patients table doesn't have clinic_id; scope via appointments when clinic context exists
+        if (req.user && req.user.clinicId) {
+            const [patients] = await pool.execute(
+                `SELECT DISTINCT p.*
+                 FROM patients p
+                 JOIN appointments a ON a.patient_id = p.id
+                 WHERE p.status = 'active' AND a.clinic_id = ?
+                 ORDER BY p.id DESC`,
+                [req.user.clinicId]
+            );
+            return sendSuccess(res, { patients });
+        }
+
         const [patients] = await pool.execute('SELECT * FROM patients WHERE status = "active"');
         sendSuccess(res, { patients });
     } catch (error) {

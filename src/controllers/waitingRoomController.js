@@ -3,6 +3,19 @@ const { sendSuccess, sendError } = require('../utils/response');
 
 exports.getWaitingList = async (req, res) => {
     try {
+        if (req.user && req.user.clinicId) {
+            const [waitingList] = await pool.execute(
+                `SELECT wr.*, a.date, a.time, a.type 
+                 FROM waiting_room wr 
+                 JOIN appointments a ON wr.appointment_id = a.id 
+                 WHERE wr.status IN ('waiting', 'in-progress') 
+                   AND a.clinic_id = ?
+                 ORDER BY wr.arrival_time ASC`,
+                [req.user.clinicId]
+            );
+            return sendSuccess(res, { waitingList });
+        }
+
         const [waitingList] = await pool.execute(
             `SELECT wr.*, a.date, a.time, a.type 
              FROM waiting_room wr 

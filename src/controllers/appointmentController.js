@@ -65,6 +65,11 @@ exports.getDoctorAppointments = async (req, res) => {
             params.push(startDate, endDate);
         }
 
+        if (req.user && req.user.clinicId) {
+            query += ' AND clinic_id = ?';
+            params.push(req.user.clinicId);
+        }
+
         query += ' ORDER BY date, time';
 
         const [appointments] = await pool.execute(query, params);
@@ -77,6 +82,19 @@ exports.getDoctorAppointments = async (req, res) => {
 
 exports.getAppointmentById = async (req, res) => {
     try {
+        if (req.user && req.user.clinicId) {
+            const [appointments] = await pool.execute(
+                'SELECT * FROM appointments WHERE id = ? AND clinic_id = ?',
+                [req.params.id, req.user.clinicId]
+            );
+
+            if (appointments.length === 0) {
+                return sendError(res, 'Appointment not found', 404);
+            }
+
+            return sendSuccess(res, { appointment: appointments[0] });
+        }
+
         const [appointments] = await pool.execute(
             'SELECT * FROM appointments WHERE id = ?',
             [req.params.id]
