@@ -40,10 +40,22 @@ exports.createPatient = async (req, res) => {
         const { name, phone, email, age, gender, dateOfBirth, address } = req.body;
         const avatar = name ? name.charAt(0) : 'P';
         
+        // Replace undefined with null for SQL
+        const params = [
+            name,
+            phone,
+            email || null,
+            age || null,
+            gender || null,
+            dateOfBirth || null,
+            address || null,
+            avatar
+        ];
+        
         const [result] = await pool.execute(
             `INSERT INTO patients (name, phone, email, age, gender, date_of_birth, address, avatar) 
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [name, phone, email, age, gender, dateOfBirth, address, avatar]
+            params
         );
         
         const medicalRecord = `MR-${result.insertId.toString().padStart(6, '0')}`;

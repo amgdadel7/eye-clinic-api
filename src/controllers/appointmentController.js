@@ -274,21 +274,125 @@ exports.createAppointment = async (req, res) => {
 
 exports.updateAppointment = async (req, res) => {
     try {
-        const { date, time, type, status, notes } = req.body;
+        const { patientId, doctorId, clinicId, date, time, type, status, phone, notes, patientName, doctorName } = req.body;
         const updates = [];
         const values = [];
 
-        if (date) { updates.push('date = ?'); values.push(date); }
-        if (time) { updates.push('time = ?'); values.push(time); }
-        if (type) { updates.push('type = ?'); values.push(type); }
-        if (status) { updates.push('status = ?'); values.push(status); }
-        if (notes !== undefined) { updates.push('notes = ?'); values.push(notes); }
+        // Update patient information if provided
+        if (patientId) {
+            updates.push('patient_id = ?');
+            values.push(patientId);
+            
+            // Get patient name if not provided
+            if (!patientName) {
+                try {
+                    const [patients] = await pool.execute(
+                        'SELECT name FROM patients WHERE id = ?',
+                        [patientId]
+                    );
+                    if (patients.length > 0) {
+                        updates.push('patient_name = ?');
+                        values.push(patients[0].name);
+                    }
+                } catch (error) {
+                    // Ignore error, use existing name
+                }
+            } else {
+                updates.push('patient_name = ?');
+                values.push(patientName);
+            }
+        }
+
+        // Update doctor information if provided
+        if (doctorId) {
+            updates.push('doctor_id = ?');
+            values.push(doctorId);
+            
+            // Get doctor name if not provided
+            if (!doctorName) {
+                try {
+                    const [doctors] = await pool.execute(
+                        'SELECT name FROM doctors WHERE id = ?',
+                        [doctorId]
+                    );
+                    if (doctors.length > 0) {
+                        updates.push('doctor_name = ?');
+                        values.push(doctors[0].name);
+                    }
+                } catch (error) {
+                    // Ignore error, use existing name
+                }
+            } else {
+                updates.push('doctor_name = ?');
+                values.push(doctorName);
+            }
+        }
+
+        // Update clinic if provided
+        if (clinicId) {
+            updates.push('clinic_id = ?');
+            values.push(clinicId);
+        }
+
+        // Update date and time
+        if (date !== undefined) {
+            updates.push('date = ?');
+            values.push(date);
+        }
+        
+        if (time !== undefined) {
+            updates.push('time = ?');
+            values.push(time);
+        }
+
+        // Update type
+        if (type !== undefined) {
+            updates.push('type = ?');
+            values.push(type);
+        }
+
+        // Update status
+        if (status !== undefined) {
+            updates.push('status = ?');
+            values.push(status);
+        }
+
+        // Update phone
+        if (phone !== undefined) {
+            updates.push('phone = ?');
+            values.push(phone);
+        }
+
+        // Update notes
+        if (notes !== undefined) {
+            updates.push('notes = ?');
+            values.push(notes);
+        }
 
         if (updates.length === 0) {
             return sendError(res, 'No fields to update', 400);
         }
 
         values.push(req.params.id);
+        
+        // Check if appointment exists and belongs to clinic
+        let whereClause = 'WHERE id = ?';
+        const whereValues = [req.params.id];
+        
+        if (req.user && req.user.clinicId) {
+            whereClause += ' AND clinic_id = ?';
+            whereValues.push(req.user.clinicId);
+        }
+        
+        const [existing] = await pool.execute(
+            `SELECT id FROM appointments ${whereClause}`,
+            whereValues
+        );
+        
+        if (existing.length === 0) {
+            return sendError(res, 'Appointment not found', 404);
+        }
+
         await pool.execute(`UPDATE appointments SET ${updates.join(', ')} WHERE id = ?`, values);
 
         sendSuccess(res, null, 'Appointment updated successfully');

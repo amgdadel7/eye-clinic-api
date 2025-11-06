@@ -6,7 +6,7 @@ exports.getAllReports = async (req, res) => {
         const clinicId = req.user.clinicId;
         const [reports] = clinicId 
             ? await pool.execute(
-                'SELECT r.* FROM medical_reports r JOIN clinics c ON r.clinic_id = c.id WHERE c.id = ? ORDER BY r.date DESC',
+                'SELECT r.* FROM medical_reports r JOIN doctors d ON r.doctor_id = d.id WHERE d.clinic_id = ? ORDER BY r.date DESC',
                 [clinicId]
             )
             : await pool.execute('SELECT * FROM medical_reports ORDER BY date DESC');

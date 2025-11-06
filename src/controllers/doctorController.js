@@ -4,8 +4,8 @@ const { sendSuccess, sendError } = require('../utils/response');
 exports.getAllDoctors = async (req, res) => {
     try {
         const query = req.user.clinicId 
-            ? 'SELECT d.*, u.name as user_name, u.avatar FROM doctors d JOIN users u ON d.user_id = u.id WHERE d.clinic_id = ?'
-            : 'SELECT d.*, u.name as user_name, u.avatar FROM doctors d JOIN users u ON d.user_id = u.id';
+            ? 'SELECT d.*, u.name as user_name, u.avatar, u.phone, u.email FROM doctors d JOIN users u ON d.user_id = u.id WHERE d.clinic_id = ?'
+            : 'SELECT d.*, u.name as user_name, u.avatar, u.phone, u.email FROM doctors d JOIN users u ON d.user_id = u.id';
         
         const [doctors] = req.user.clinicId 
             ? await pool.execute(query, [req.user.clinicId])
@@ -14,7 +14,9 @@ exports.getAllDoctors = async (req, res) => {
         // Parse JSON fields
         const doctorsList = doctors.map(doctor => ({
             ...doctor,
-            workingHours: doctor.working_hours ? JSON.parse(doctor.working_hours) : {}
+            workingHours: typeof doctor.working_hours === 'string' 
+                ? JSON.parse(doctor.working_hours) 
+                : (doctor.working_hours || {})
         }));
         
         sendSuccess(res, { doctors: doctorsList });
@@ -36,7 +38,9 @@ exports.getDoctorById = async (req, res) => {
         }
         
         const doctor = doctors[0];
-        doctor.workingHours = doctor.working_hours ? JSON.parse(doctor.working_hours) : {};
+        doctor.workingHours = typeof doctor.working_hours === 'string' 
+            ? JSON.parse(doctor.working_hours) 
+            : (doctor.working_hours || {});
         
         sendSuccess(res, { doctor });
     } catch (error) {

@@ -11,8 +11,8 @@ exports.getAllClinics = async (req, res) => {
         // Parse JSON fields
         const clinicsList = clinics.map(clinic => ({
             ...clinic,
-            services: clinic.services ? JSON.parse(clinic.services) : [],
-            workingHours: clinic.workingHours ? JSON.parse(clinic.workingHours) : {}
+            services: typeof clinic.services === 'string' ? JSON.parse(clinic.services) : (clinic.services || []),
+            workingHours: typeof clinic.workingHours === 'string' ? JSON.parse(clinic.workingHours) : (clinic.workingHours || {})
         }));
 
         sendSuccess(res, { clinics: clinicsList });
@@ -36,8 +36,8 @@ exports.getClinicById = async (req, res) => {
         }
 
         const clinic = clinics[0];
-        clinic.services = clinic.services ? JSON.parse(clinic.services) : [];
-        clinic.workingHours = clinic.workingHours ? JSON.parse(clinic.workingHours) : {};
+        clinic.services = typeof clinic.services === 'string' ? JSON.parse(clinic.services) : (clinic.services || []);
+        clinic.workingHours = typeof clinic.workingHours === 'string' ? JSON.parse(clinic.workingHours) : (clinic.workingHours || {});
 
         sendSuccess(res, { clinic });
 
@@ -61,7 +61,7 @@ exports.getClinicDoctors = async (req, res) => {
         // Parse JSON fields
         const doctorsList = doctors.map(doctor => ({
             ...doctor,
-            workingHours: doctor.workingHours ? JSON.parse(doctor.workingHours) : {}
+            workingHours: typeof doctor.workingHours === 'string' ? JSON.parse(doctor.workingHours) : (doctor.workingHours || {})
         }));
 
         sendSuccess(res, { doctors: doctorsList });
@@ -87,8 +87,8 @@ exports.getClinicServices = async (req, res) => {
         const clinic = clinics[0];
 
         sendSuccess(res, {
-            services: clinic.services ? JSON.parse(clinic.services) : [],
-            servicesEn: clinic.services_en ? JSON.parse(clinic.services_en) : []
+            services: typeof clinic.services === 'string' ? JSON.parse(clinic.services) : (clinic.services || []),
+            servicesEn: typeof clinic.services_en === 'string' ? JSON.parse(clinic.services_en) : (clinic.services_en || [])
         });
 
     } catch (error) {

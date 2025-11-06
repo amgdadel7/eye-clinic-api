@@ -75,10 +75,13 @@ app.use((req, res, next) => {
 // Quiet missing favicon in logs
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
-// Rate limiting
+// Rate limiting - More lenient for development
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 200, // Increased from 100 to 200 requests per window
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 app.use(limiter);
 
@@ -174,6 +177,18 @@ app.use('/users', require('./routes/users'));
 
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/analytics', require('./routes/analytics'));
+
+// Reports (daily/monthly aggregates)
+app.use('/api/reports', require('./routes/reports'));
+app.use('/reports', require('./routes/reports'));
+
+// UI and Settings endpoints
+app.use('/api/ui', require('./routes/ui'));
+app.use('/ui', require('./routes/ui'));
+app.use('/api/settings', require('./routes/settings'));
+app.use('/settings', require('./routes/settings'));
+app.use('/api/user-settings', require('./routes/userSettings'));
+app.use('/user-settings', require('./routes/userSettings'));
 
 app.use('/api/mobile/prescriptions', require('./routes/mobilePrescriptions'));
 app.use('/mobile/prescriptions', require('./routes/mobilePrescriptions'));

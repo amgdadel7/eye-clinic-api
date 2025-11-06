@@ -134,6 +134,7 @@ CREATE TABLE prescriptions (
     patient_name VARCHAR(255) NOT NULL,
     doctor_id INT NOT NULL,
     doctor_name VARCHAR(255) NOT NULL,
+    clinic_id INT NOT NULL,
     date DATE NOT NULL,
     medications JSON NOT NULL,
     instructions TEXT,
@@ -142,7 +143,8 @@ CREATE TABLE prescriptions (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+    FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
 );
 
 -- Medical Reports Table
@@ -152,6 +154,7 @@ CREATE TABLE medical_reports (
     patient_name VARCHAR(255) NOT NULL,
     doctor_id INT NOT NULL,
     doctor_name VARCHAR(255) NOT NULL,
+    clinic_id INT NOT NULL,
     date DATE NOT NULL,
     report_type VARCHAR(100),
     diagnosis TEXT,
@@ -162,7 +165,8 @@ CREATE TABLE medical_reports (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+    FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
 );
 
 -- Test Results Table
@@ -172,6 +176,7 @@ CREATE TABLE test_results (
     patient_name VARCHAR(255) NOT NULL,
     doctor_id INT NOT NULL,
     doctor_name VARCHAR(255) NOT NULL,
+    clinic_id INT NOT NULL,
     test_type VARCHAR(100) NOT NULL,
     test_date DATE NOT NULL,
     result TEXT,
@@ -180,7 +185,8 @@ CREATE TABLE test_results (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+    FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
 );
 
 -- Color Blindness Tests Table
@@ -213,6 +219,8 @@ CREATE TABLE waiting_room (
     patient_id INT NOT NULL,
     patient_name VARCHAR(255) NOT NULL,
     appointment_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    clinic_id INT NOT NULL,
     arrival_time DATETIME NOT NULL,
     status ENUM('waiting', 'in-progress', 'completed', 'associated') DEFAULT 'waiting',
     priority ENUM('normal', 'urgent', 'emergency') DEFAULT 'normal',
@@ -221,7 +229,44 @@ CREATE TABLE waiting_room (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+    FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
+);
+
+-- Notifications Table
+CREATE TABLE notifications (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    type ENUM('appointment', 'patient', 'doctor', 'system', 'reminder', 'alert') DEFAULT 'system',
+    priority ENUM('low', 'medium', 'high', 'urgent') DEFAULT 'medium',
+    is_read BOOLEAN DEFAULT FALSE,
+    action_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- User Settings Table
+CREATE TABLE user_settings (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT UNIQUE NOT NULL,
+    language VARCHAR(10) DEFAULT 'ar',
+    theme ENUM('light', 'dark') DEFAULT 'light',
+    sidebar_collapsed BOOLEAN DEFAULT FALSE,
+    sound_notifications BOOLEAN DEFAULT TRUE,
+    email_notifications BOOLEAN DEFAULT TRUE,
+    sms_notifications BOOLEAN DEFAULT FALSE,
+    push_notifications BOOLEAN DEFAULT TRUE,
+    appointment_reminders BOOLEAN DEFAULT TRUE,
+    new_appointment_alerts BOOLEAN DEFAULT TRUE,
+    system_alerts BOOLEAN DEFAULT TRUE,
+    reminder_time_minutes INT DEFAULT 30,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Indexes for better performance
@@ -232,4 +277,12 @@ CREATE INDEX idx_appointment_date ON appointments(date);
 CREATE INDEX idx_appointment_doctor ON appointments(doctor_id);
 CREATE INDEX idx_appointment_status ON appointments(status);
 CREATE INDEX idx_waiting_status ON waiting_room(status);
+CREATE INDEX idx_waiting_doctor ON waiting_room(doctor_id);
+CREATE INDEX idx_waiting_clinic ON waiting_room(clinic_id);
+CREATE INDEX idx_prescription_clinic ON prescriptions(clinic_id);
+CREATE INDEX idx_medical_report_clinic ON medical_reports(clinic_id);
+CREATE INDEX idx_test_result_clinic ON test_results(clinic_id);
 CREATE INDEX idx_test_number ON color_blindness_tests(test_number);
+CREATE INDEX idx_notification_user ON notifications(user_id);
+CREATE INDEX idx_notification_read ON notifications(is_read);
+CREATE INDEX idx_notification_type ON notifications(type);
