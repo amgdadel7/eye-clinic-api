@@ -179,23 +179,40 @@ exports.login = async (req, res) => {
             return sendError(res, 'Email and password are required', 400);
         }
 
+        // First, try to find user with LEFT JOIN to handle missing clinic gracefully
         const [users] = await pool.execute(
-            `SELECT u.*, c.name as clinic_name, c.code as clinic_code 
+            `SELECT u.*, c.name as clinic_name, c.code as clinic_code, c.status as clinic_status
              FROM users u 
-             JOIN clinics c ON u.clinic_id = c.id 
+             LEFT JOIN clinics c ON u.clinic_id = c.id 
              WHERE u.email = ?`,
             [email]
         );
 
         if (users.length === 0) {
+            console.log(`Login attempt failed: User not found with email: ${email}`);
             return sendError(res, 'Invalid credentials', 401);
         }
 
         const user = users[0];
 
+        // Log user found for debugging
+        console.log(`Login attempt for user: ${email}, role: ${user.role}, status: ${user.status}, clinic_id: ${user.clinic_id}`);
+
+        // Check if clinic exists and is active (if clinic_id is not null)
+        if (user.clinic_id && !user.clinic_name) {
+            console.error(`User ${email} has clinic_id ${user.clinic_id} but clinic not found in database`);
+            return sendError(res, 'Your account is associated with an invalid clinic. Please contact administrator.', 403);
+        }
+
+        if (user.clinic_id && user.clinic_status && user.clinic_status !== 'active') {
+            console.log(`User ${email} clinic is not active: ${user.clinic_status}`);
+            return sendError(res, 'Your clinic account is not active. Please contact administrator.', 403);
+        }
+
         // Check password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
+            console.log(`Login attempt failed: Invalid password for email: ${email}`);
             return sendError(res, 'Invalid credentials', 401);
         }
 
@@ -206,6 +223,10 @@ exports.login = async (req, res) => {
 
         if (user.status === 'rejected') {
             return sendError(res, 'Your account has been rejected', 403);
+        }
+
+        if (user.status === 'inactive') {
+            return sendError(res, 'Your account is inactive. Please contact administrator.', 403);
         }
 
         // Update last login
@@ -232,15 +253,15 @@ exports.login = async (req, res) => {
                 clinicId: user.clinic_id,
                 avatar: user.avatar
             },
-            clinic: {
+            clinic: user.clinic_id ? {
                 id: user.clinic_id,
                 name: user.clinic_name,
                 code: user.clinic_code
-            }
+            } : null
         }, 'Login successful');
 
     } catch (error) {
-        console.error(error);
+        console.error('Login error:', error);
         sendError(res, error.message || 'Error logging in', 500);
     }
 };

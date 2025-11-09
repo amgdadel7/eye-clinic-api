@@ -12,5 +12,6 @@ router.post('/', authorize('admin'), doctorController.createDoctor);
 router.put('/:id', doctorController.updateDoctor);
 router.get('/:id/schedule', doctorController.getDoctorSchedule);
 router.put('/:id/schedule', doctorController.updateSchedule);
+router.delete('/:id', authorize('admin'), doctorController.deleteDoctor);
 
 module.exports = router;

@@ -148,3 +148,25 @@ exports.updateSchedule = async (req, res) => {
         sendError(res, error.message || 'Error updating schedule', 500);
     }
 };
+
+exports.deleteDoctor = async (req, res) => {
+    try {
+        const doctorId = req.params.id;
+
+        const [doctors] = await pool.execute(
+            'SELECT id FROM doctors WHERE id = ?',
+            [doctorId]
+        );
+
+        if (doctors.length === 0) {
+            return sendError(res, 'Doctor not found', 404);
+        }
+
+        await pool.execute('DELETE FROM doctors WHERE id = ?', [doctorId]);
+
+        sendSuccess(res, null, 'Doctor deleted successfully');
+    } catch (error) {
+        console.error(error);
+        sendError(res, error.message || 'Error deleting doctor', 500);
+    }
+};

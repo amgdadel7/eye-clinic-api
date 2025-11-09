@@ -6,6 +6,7 @@ const { authenticateToken, authorize } = require('../middleware/auth');
 // All routes require authentication
 router.use(authenticateToken);
 
+router.get('/', analyticsController.getAnalyticsOverview);
 router.get('/dashboard', analyticsController.getDashboardStats);
 router.get('/patients', analyticsController.getPatientStats);
 router.get('/appointments', analyticsController.getAppointmentStats);

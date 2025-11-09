@@ -9,6 +9,8 @@ router.use(authenticateToken);
 router.get('/', medicalReportController.getAllReports);
 router.get('/patient/:patientId', medicalReportController.getPatientReports);
 router.get('/:id', medicalReportController.getReportById);
-router.post('/', authorize('doctor'), medicalReportController.createReport);
+router.post('/', authorize('doctor', 'admin'), medicalReportController.createReport);
+router.put('/:id', authorize('doctor', 'admin'), medicalReportController.updateReport);
+router.delete('/:id', authorize('doctor', 'admin'), medicalReportController.deleteReport);
 
 module.exports = router;

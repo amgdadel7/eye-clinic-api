@@ -123,6 +123,7 @@ app.use('/api/mobile/color-tests', require('./routes/mobileColorTests'));
 app.use('/api/waiting-room', require('./routes/waitingRoom'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/analytics', require('./routes/analytics'));
+app.use('/api/reports', require('./routes/reports'));
 app.use('/api/mobile/prescriptions', require('./routes/mobilePrescriptions'));
 app.use('/api/mobile/medical-reports', require('./routes/mobileReports'));
 app.use('/api/mobile/test-results', require('./routes/mobileTestResults'));
