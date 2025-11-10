@@ -20,7 +20,7 @@ exports.bookAppointment = async (req, res) => {
 
         // Get doctor info
         const [doctors] = await pool.execute(
-            'SELECT d.*, u.name as doctor_name FROM doctors d JOIN users u ON d.user_id = u.id WHERE d.id = ?技術',
+            'SELECT d.*, u.name as doctor_name FROM doctors d JOIN users u ON d.user_id = u.id WHERE d.id = ?',
             [doctorId]
         );
         if (doctors.length === 0) {
@@ -38,69 +38,106 @@ exports.bookAppointment = async (req, res) => {
             return sendError(res, 'Doctor has no available schedule', 400);
         }
 
-        // Find first available appointment slot
+        const { preferredDate, preferredTime } = req.body;
+
+        // Optional: respect preferred slot if provided and available
         let appointmentDate = null;
         let appointmentTime = null;
 
-        // Start from tomorrow
-        const today = new Date();
-        today.setDate(today.getDate() + 1);
-        today.setHours(0, 0, 0, 0);
-
-        // Check up to 30 days ahead
-        for (let dayOffset = 0; dayOffset < 30; dayOffset++) {
-            const checkDate = new Date(today);
-            checkDate.setDate(today.getDate() + dayOffset);
-            
-            const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][checkDate.getDay()];
-            
-            // Find schedule for this day
+        if (preferredDate && preferredTime) {
+            const preferred = new Date(preferredDate);
+            const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][preferred.getDay()];
             const daySchedule = schedules.find(s => s.day_of_week === dayOfWeek);
-            
-            if (!daySchedule) continue;
 
-            // Parse times
-            const [startHour, startMin] = daySchedule.start_time.split(':').map(Number);
-            const [endHour, endMin] = daySchedule.end_time.split(':').map(Number);
-            
-            // Check break times if exists
-            let breakStart = null, breakEnd = null;
-            if (daySchedule.break_start_time && daySchedule.break_end_time) {
-                breakStart = daySchedule.break_start_time.split(':').map(Number);
-                breakEnd = daySchedule.break_end_time.split(':').map(Number);
-            }
+            if (daySchedule) {
+                const [startHour, startMin] = daySchedule.start_time.split(':').map(Number);
+                const [endHour, endMin] = daySchedule.end_time.split(':').map(Number);
+                const [slotHour, slotMin] = preferredTime.split(':').map(Number);
 
-            // Check 30-minute slots
-            for (let hour = startHour; hour < endHour; hour++) {
-                for (let min = 0; min < 60; min += 30) {
-                    // Skip break time
-                    if (breakStart && breakEnd) {
-                        const currentTime = hour * 60 + min;
-                        const breakStartTime = breakStart[0] * 60 + breakStart[1];
-                        const breakEndTime = breakEnd[0] * 60 + breakEnd[1];
-                        if (currentTime >= breakStartTime && currentTime < breakEndTime) {
-                            continue;
-                        }
-                    }
+                const slotMinutes = slotHour * 60 + slotMin;
+                const startMinutes = startHour * 60 + startMin;
+                const endMinutes = endHour * 60 + endMin;
 
-                    const slotTime = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
-                    const slotDate = checkDate.toISOString().split('T')[0];
+                let withinBreak = false;
+                if (daySchedule.break_start_time && daySchedule.break_end_time) {
+                    const [breakStartHour, breakStartMin] = daySchedule.break_start_time.split(':').map(Number);
+                    const [breakEndHour, breakEndMin] = daySchedule.break_end_time.split(':').map(Number);
+                    const breakStartMinutes = breakStartHour * 60 + breakStartMin;
+                    const breakEndMinutes = breakEndHour * 60 + breakEndMin;
+                    withinBreak = slotMinutes >= breakStartMinutes && slotMinutes < breakEndMinutes;
+                }
 
-                    // Check if slot is already booked
-                    const [existing] = await pool.execute(
-                        'SELECT id FROM appointments WHERE doctor_id = ? AND date = ? AND time = ? AND status != "cancelled"',
-                        [doctorId, slotDate, slotTime]
+                if (slotMinutes >= startMinutes && slotMinutes < endMinutes && !withinBreak) {
+                    const slotDate = preferred.toISOString().split('T')[0];
+                    const [existingPreferred] = await pool.execute(
+                        'SELECT id FROM appointments WHERE doctor_id = ? AND date = ? AND time = ? AND status != \"cancelled\"',
+                        [doctorId, slotDate, preferredTime]
                     );
 
-                    if (existing.length === 0) {
+                    if (existingPreferred.length === 0) {
                         appointmentDate = slotDate;
-                        appointmentTime = slotTime;
-                        break;
+                        appointmentTime = preferredTime;
                     }
+                }
+            }
+        }
+
+        // Find first available appointment slot if preferred slot unavailable
+        if (!appointmentDate || !appointmentTime) {
+            // Start from tomorrow
+            const today = new Date();
+            today.setDate(today.getDate() + 1);
+            today.setHours(0, 0, 0, 0);
+
+            // Check up to 30 days ahead
+            for (let dayOffset = 0; dayOffset < 30; dayOffset++) {
+                const checkDate = new Date(today);
+                checkDate.setDate(today.getDate() + dayOffset);
+                
+                const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][checkDate.getDay()];
+                
+                const daySchedule = schedules.find(s => s.day_of_week === dayOfWeek);
+                
+                if (!daySchedule) continue;
+
+                const [startHour, startMin] = daySchedule.start_time.split(':').map(Number);
+                const [endHour, endMin] = daySchedule.end_time.split(':').map(Number);
+                
+                let breakStart = null, breakEnd = null;
+                if (daySchedule.break_start_time && daySchedule.break_end_time) {
+                    breakStart = daySchedule.break_start_time.split(':').map(Number);
+                    breakEnd = daySchedule.break_end_time.split(':').map(Number);
+                }
+
+                for (let hour = startHour; hour < endHour; hour++) {
+                    for (let min = 0; min < 60; min += 30) {
+                        if (breakStart && breakEnd) {
+                            const currentTime = hour * 60 + min;
+                            const breakStartTime = breakStart[0] * 60 + breakStart[1];
+                            const breakEndTime = breakEnd[0] * 60 + breakEnd[1];
+                            if (currentTime >= breakStartTime && currentTime < breakEndTime) {
+                                continue;
+                            }
+                        }
+
+                        const slotTime = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+                        const slotDate = checkDate.toISOString().split('T')[0];
+
+                        const [existing] = await pool.execute(
+                            'SELECT id FROM appointments WHERE doctor_id = ? AND date = ? AND time = ? AND status != \"cancelled\"',
+                            [doctorId, slotDate, slotTime]
+                        );
+
+                        if (existing.length === 0) {
+                            appointmentDate = slotDate;
+                            appointmentTime = slotTime;
+                            break;
+                        }
+                    }
+                    if (appointmentDate) break;
                 }
                 if (appointmentDate) break;
             }
-            if (appointmentDate) break;
         }
 
         if (!appointmentDate) {
