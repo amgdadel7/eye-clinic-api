@@ -195,6 +195,12 @@ exports.login = async (req, res) => {
 
         const user = users[0];
 
+        const allowedRoles = ['admin', 'doctor', 'receptionist'];
+        if (!allowedRoles.includes(user.role)) {
+            console.warn(`Dashboard login blocked for user ${email} with role ${user.role}`);
+            return sendError(res, 'Patients must use the mobile application to sign in', 403);
+        }
+
         // Log user found for debugging
         console.log(`Login attempt for user: ${email}, role: ${user.role}, status: ${user.status}, clinic_id: ${user.clinic_id}`);
 

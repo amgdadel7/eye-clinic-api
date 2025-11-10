@@ -129,7 +129,15 @@ INSERT INTO patients (id, name, phone, email, age, gender, date_of_birth, addres
 (22, 'ريم عبدالله القحطاني', '+966505678002', 'reem.qhtani@email.com', 37, 'female', '1987-10-17', 'الطائف، حي النخيل', 'MR-MEC-002', 'Normal', '2024-12-18', 'active', 'F'),
 (23, 'خالد فيصل الشمري', '+966505678003', 'khalid.shamri@email.com', 54, 'male', '1970-06-23', 'الطائف، حي الروضة', 'MR-MEC-003', 'Protanopia', '2024-12-13', 'active', 'M'),
 (24, 'مريم سعد البقمي', '+966505678004', 'mariam.baqmi@email.com', 25, 'female', '1999-02-08', 'الطائف، حي الشاطئ', 'MR-MEC-004', 'Normal', '2024-12-22', 'active', 'F'),
-(25, 'عبدالرحمن أحمد الدوسري', '+966505678005', 'abdulrahman.dosari@email.com', 46, 'male', '1978-11-15', 'الطائف، حي الفيصلية', 'MR-MEC-005', 'Deuteranopia', '2024-12-15', 'active', 'M');
+(25, 'عبدالرحمن أحمد الدوسري', '+966505678005', 'abdulrahman.dosari@email.com', 46, 'male', '1978-11-15', 'الطائف، حي الفيصلية', 'MR-MEC-005', 'Deuteranopia', '2024-12-15', 'active', 'M'),
+
+-- Clinic 5 Patients
+(26, 'عبدالله نايف الرويلي', '+966505678006', 'abdullah.ruwaili@email.com', 36, 'male', '1988-01-08', 'الطائف، حي الوسام', 'MR-MEC-006', 'Normal', '2024-12-15', 'active', 'M');
+
+-- Set default hashed password for all seeded patients (Patient@123)
+UPDATE patients
+SET password = '$2a$10$jijxENZT8Qn9e.0EZcjmYO789.YS8pQMVVGQARvZGWApZFaFNKbTi'
+WHERE password IS NULL OR password = '';
 
 -- =============================================
 -- SCHEDULES DATA (جداول الأطباء)

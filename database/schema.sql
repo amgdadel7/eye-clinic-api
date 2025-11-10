@@ -72,8 +72,9 @@ CREATE TABLE doctors (
 CREATE TABLE patients (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
-    phone VARCHAR(20) NOT NULL,
-    email VARCHAR(255),
+    phone VARCHAR(20) NOT NULL UNIQUE,
+    email VARCHAR(255) UNIQUE,
+    password VARCHAR(255),
     age INT,
     gender ENUM('male', 'female'),
     date_of_birth DATE,

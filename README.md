@@ -266,6 +266,17 @@ Authorization: Bearer <token>
 - View test results
 - Take color blindness tests
 
+#### Seeded Patient Accounts (Mobile Only)
+| Name | Phone | Password |
+| --- | --- | --- |
+| عبدالله محمد الأحمد | +966501234001 | Patient@123 |
+| فاطمة عبدالرحمن السعد | +966501234002 | Patient@123 |
+| محمد خالد المطيري | +966501234003 | Patient@123 |
+| نورا سعد الغامدي | +966501234004 | Patient@123 |
+| سعد عبدالله القحطاني | +966501234005 | Patient@123 |
+
+> **ملاحظة:** يتم تقييد حسابات المرضى على تطبيق الهاتف المحمول فقط. محاولات تسجيل الدخول عبر لوحة التحكم الإدارية (`/api/auth/login`) يتم رفضها برسالة توجيه لاستخدام التطبيق المحمول.
+
 ## Database Schema
 
 The database includes the following main tables:
