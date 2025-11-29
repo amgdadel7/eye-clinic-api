@@ -1,12 +1,27 @@
-// Express App (for Vercel serverless and local server)
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
-const { errorHandler, notFound } = require('./middleware/errorHandler');
-const swaggerSetup = require('./config/swagger');
+/**
+ * Express Application Configuration / تكوين تطبيق Express
+ * 
+ * This file configures the Express application for both Vercel serverless deployment
+ * and local server deployment. It sets up middleware, routes, and error handling.
+ * This module exports the Express app instance for use in server.js or serverless functions.
+ * 
+ * يكوّن هذا الملف تطبيق Express للنشر serverless على Vercel والنشر المحلي.
+ * يُعد البرامج الوسيطة والمسارات ومعالجة الأخطاء.
+ * تُصدّر هذه الوحدة مثيل تطبيق Express للاستخدام في server.js أو دوال serverless.
+ */
 
+// Load environment variables from .env file / تحميل متغيرات البيئة من ملف .env
+require('dotenv').config();
+
+// Import required modules / استيراد الوحدات المطلوبة
+const express = require('express');              // Web framework / إطار الويب
+const cors = require('cors');                    // Cross-Origin Resource Sharing / مشاركة الموارد بين المصادر المختلفة
+const morgan = require('morgan');                // HTTP request logger / مسجل طلبات HTTP
+const rateLimit = require('express-rate-limit'); // Rate limiting middleware / برنامج تحديد المعدل الوسيط
+const { errorHandler, notFound } = require('./middleware/errorHandler'); // Error handling / معالجة الأخطاء
+const swaggerSetup = require('./config/swagger');                        // Swagger documentation setup / إعداد توثيق Swagger
+
+// Create Express application instance / إنشاء مثيل تطبيق Express
 const app = express();
 
 // Middleware - CORS Configuration

@@ -115,3 +115,48 @@ exports.getMyResults = async (req, res) => {
         sendError(res, error.message || 'Error fetching results', 500);
     }
 };
+
+// Get preview images for test types
+// الحصول على صور المعاينة لأنواع الاختبارات
+exports.getTestTypePreview = async (req, res) => {
+    try {
+        const { testType } = req.params; // normal, protanopia, deuteranopia
+        
+        // Map test types to plate_type values
+        // تعيين أنواع الاختبارات إلى قيم plate_type
+        let plateType;
+        if (testType === 'normal') {
+            plateType = 'All see';
+        } else if (testType === 'protanopia' || testType === 'deuteranopia') {
+            plateType = 'Red-Green';
+        } else {
+            return sendError(res, 'Invalid test type. Use: normal, protanopia, or deuteranopia', 400);
+        }
+
+        // Get first test image for this plate type as preview
+        // الحصول على أول صورة اختبار لهذا النوع كمعاينة
+        const [tests] = await pool.execute(
+            `SELECT id, test_number, test_name, image_base64, plate_type 
+             FROM color_blindness_tests 
+             WHERE plate_type = ? 
+             ORDER BY test_number 
+             LIMIT 1`,
+            [plateType]
+        );
+
+        if (tests.length === 0) {
+            return sendError(res, `No preview image found for test type: ${testType}`, 404);
+        }
+
+        sendSuccess(res, {
+            testType: testType,
+            previewImage: tests[0].image_base64,
+            testId: tests[0].id,
+            testNumber: tests[0].test_number,
+            testName: tests[0].test_name
+        });
+    } catch (error) {
+        console.error(error);
+        sendError(res, error.message || 'Error fetching test type preview', 500);
+    }
+};
