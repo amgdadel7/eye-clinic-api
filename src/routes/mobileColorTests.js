@@ -7,6 +7,7 @@ const { authenticateToken } = require('../middleware/auth');
 router.use(authenticateToken);
 
 router.get('/all', mobileColorTestController.getAllTests);
+router.get('/by-type/:testType', mobileColorTestController.getTestsByType);
 router.get('/preview/:testType', mobileColorTestController.getTestTypePreview);
 router.post('/submit-answers', mobileColorTestController.submitAnswers);
 router.get('/my-results', mobileColorTestController.getMyResults);

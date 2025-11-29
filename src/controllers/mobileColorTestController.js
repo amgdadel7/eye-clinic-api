@@ -116,8 +116,53 @@ exports.getMyResults = async (req, res) => {
     }
 };
 
-// Get preview images for test types
-// الحصول على صور المعاينة لأنواع الاختبارات
+// Get tests by test type (normal, protanopia, deuteranopia)
+// الحصول على الاختبارات حسب نوع الاختبار
+exports.getTestsByType = async (req, res) => {
+    try {
+        const { testType } = req.params; // normal, protanopia, deuteranopia
+        
+        // Map test types to plate_type values
+        // تعيين أنواع الاختبارات إلى قيم plate_type
+        let plateType;
+        if (testType === 'normal') {
+            plateType = 'All see';
+        } else if (testType === 'protanopia' || testType === 'deuteranopia') {
+            plateType = 'Red-Green';
+        } else {
+            return sendError(res, 'Invalid test type. Use: normal, protanopia, or deuteranopia', 400);
+        }
+
+        // Get tests filtered by plate type
+        // الحصول على الاختبارات المصفاة حسب نوع اللوحة
+        const [tests] = await pool.execute(
+            `SELECT id, test_number, test_name, image_base64, correct_answer, description, plate_type 
+             FROM color_blindness_tests 
+             WHERE plate_type = ? 
+             ORDER BY test_number`,
+            [plateType]
+        );
+
+        sendSuccess(res, { 
+            testType: testType,
+            tests: tests.map(test => ({
+                testId: test.id,
+                testNumber: test.test_number,
+                testName: test.test_name,
+                image: test.image_base64,
+                correctAnswer: test.correct_answer,
+                description: test.description,
+                plateType: test.plate_type
+            }))
+        });
+    } catch (error) {
+        console.error(error);
+        sendError(res, error.message || 'Error fetching tests by type', 500);
+    }
+};
+
+// Get preview image for a test type
+// الحصول على صورة المعاينة لنوع الاختبار
 exports.getTestTypePreview = async (req, res) => {
     try {
         const { testType } = req.params; // normal, protanopia, deuteranopia
